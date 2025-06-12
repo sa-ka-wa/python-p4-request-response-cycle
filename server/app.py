@@ -1,39 +1,38 @@
-#!/usr/bin/env python3
+import os
 
-from flask import Flask
+from flask import Flask, request, current_app, g
 
 app = Flask(__name__)
+
+@app.before_request
+def app_path():
+    g.path = os.path.abspath(os.getcwd())
 
 @app.route('/')
 def index():
     host = request.headers.get('Host')
-    return f'<h1>The host for this page is {host}</h1>'
+    appname = current_app.name
+    response_body = f'''
+        <h1>The host for this page is {host}</h1>
+        <h2>The name of this application is {appname}</h2>
+        <h3>The path of this application on the user's device is {g.path}</h3>
+    '''
 
-@app.route('/print/parameter')
-def print_string(parameter):
-    print (parameter)
-    return (parameter)
+    status_code = 200
+    headers = {}
 
-@app.route('/count/<int:parameter>')
-def count(parameter):
-    number = '\n'.join(str(i) for i in range(parameter)) + '\n'
-    return numbers
+    return make_response(response_body, status_code, headers)
 
-@app.route('/math/<int:num1>/<operation>/<Iint:num2>')
-def math(num1, operation, num2):
-    if operation == '+':
-        result = num1 + num2
-    elif operation == '-':
-        result = num1 - num2
-    elif operation == '*':
-        result = num1 * num2
-    elif operation == 'div':
-        result = num1 / num2
-    elif operation == '%':
-        result = num1 % num2
-    else:
-        return "Invalid operation", 400
-    return str(result)
+@app.route('/reginald-kenneth-dwight')
+def index():
+    return redirect('names.com/elton-john')
+
+@app.route('/<stage_name>')
+def get_name(stage_name):
+    match = session.query('StageName').filter(StageName.name == stage_name)[0]
+    if not match:
+        abort(404)
+    return make_response(f'<h1>{stage_name} is an existing stage name!</h1>')
 
 if __name__ == '__main__':
     app.run(port=5555, debug=True)
